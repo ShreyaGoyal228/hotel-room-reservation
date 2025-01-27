@@ -1,4 +1,3 @@
-
 generator client {
     provider = "prisma-client-js"
 }
@@ -9,8 +8,8 @@ datasource db {
 }
 
 model Rooms {
-    id   String  @id @default(cuid())
-    room_number Int
-    floor   Int
-    is_available  Boolean  @default(true)
+    id           String  @id @default(cuid())
+    room_number  Int
+    floor        Int
+    is_available Boolean @default(true)
 }
