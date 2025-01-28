@@ -180,9 +180,10 @@ export const randomOccupancy = async () => {
     });
 
     // Separate already booked rooms
-    const bookedRooms = hotelRooms.filter((room) => !room.is_available);
-    const availableRooms = hotelRooms.filter((room) => room.is_available);
-
+    const bookedRooms = hotelRooms.filter((room) => !room.is_available) || [];
+    const availableRooms = hotelRooms.filter((room) => room.is_available) || [];
+console.log("booked rooms are",bookedRooms)
+console.log("available rooms are",availableRooms.length)
     // Determine random occupancy for available rooms (40% chance to be occupied)
     const updatedRooms = availableRooms.map((room) => ({
       id: room.id,
@@ -190,6 +191,7 @@ export const randomOccupancy = async () => {
     }));
 
     const finalRooms = [...bookedRooms, ...updatedRooms];
+    console.log("final rooms are",finalRooms);
 
     // Update only the rooms that changed
     const BATCH_SIZE = 10;
@@ -206,7 +208,7 @@ export const randomOccupancy = async () => {
         ),
       );
     }
-    setTimeout(() => revalidatePath("/"), 1000);
+    revalidatePath("/");
     return {
       message: "Random occupancy applied while keeping booked rooms unchanged.",
     };
