@@ -192,15 +192,21 @@ export const randomOccupancy = async () => {
     const finalRooms = [...bookedRooms, ...updatedRooms];
 
     // Update only the rooms that changed
-    await db.$transaction(
-      finalRooms.map((room) =>
-        db.rooms.update({
-          where: { id: room.id },
-          data: { is_available: room.is_available },
-        }),
-      ),
-    );
-    revalidatePath("/");
+    const BATCH_SIZE = 10;
+
+    for (let i = 0; i < finalRooms.length; i += BATCH_SIZE) {
+      const batch = finalRooms.slice(i, i + BATCH_SIZE);
+
+      await db.$transaction(
+        batch.map((room) =>
+          db.rooms.update({
+            where: { id: room.id },
+            data: { is_available: room.is_available },
+          }),
+        ),
+      );
+    }
+    setTimeout(() => revalidatePath("/"), 1000);
     return {
       message: "Random occupancy applied while keeping booked rooms unchanged.",
     };
