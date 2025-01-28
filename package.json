@@ -7,7 +7,7 @@
     "seed": "node ./prisma/seed-rooms.ts"
   },
   "scripts": {
-    "seed": "tsx prisma/seed-rooms.ts",
+    "prebuild": "tsx prisma/seed-rooms.ts",
     "build": "next build",
     "check": "next lint && tsc --noEmit",
     "db:generate": "prisma migrate dev",
