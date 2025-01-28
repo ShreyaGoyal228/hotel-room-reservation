@@ -18,6 +18,7 @@ import {
 } from "~/actions/room-booking-action";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useState } from "react";
 
 const formSchema = z.object({
   noOfRooms: z.coerce
@@ -28,6 +29,7 @@ const formSchema = z.object({
 });
 const RoomBookingForm = () => {
   const router = useRouter();
+  const [loading, setIsLoading] = useState<boolean>(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -36,6 +38,7 @@ const RoomBookingForm = () => {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsLoading(true);
     await bookRooms(values.noOfRooms)
       .then((resp) => {
         if (resp.message) {
@@ -50,6 +53,9 @@ const RoomBookingForm = () => {
       .catch((err) => {
         toast.error(err);
         console.log("error in catch is", err);
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
   }
 
@@ -113,6 +119,7 @@ const RoomBookingForm = () => {
             <Button
               type="submit"
               className="rounded bg-blue-500 text-white hover:bg-blue-600"
+              disabled={loading}
             >
               Book
             </Button>
