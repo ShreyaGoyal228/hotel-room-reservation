@@ -200,6 +200,7 @@ export const randomOccupancy = async () => {
         }),
       ),
     );
+    revalidatePath("/");
     return {
       message: "Random occupancy applied while keeping booked rooms unchanged.",
     };

@@ -30,6 +30,7 @@ const formSchema = z.object({
 const RoomBookingForm = () => {
   const router = useRouter();
   const [loading, setIsLoading] = useState<boolean>(false);
+  const [randomLoad, randomSetLoad] = useState<boolean>(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -77,6 +78,7 @@ const RoomBookingForm = () => {
   }
 
   async function handleRandomOccupancy() {
+    randomSetLoad(true);
     await randomOccupancy()
       .then((resp) => {
         if (resp.message) {
@@ -90,6 +92,9 @@ const RoomBookingForm = () => {
       .catch((err) => {
         console.log("error in catch block during random occupancy is", err);
         toast.error(err);
+      })
+      .finally(() => {
+        randomSetLoad(false);
       });
   }
   return (
@@ -131,6 +136,7 @@ const RoomBookingForm = () => {
         <Button
           variant="outline"
           className="rounded"
+          disabled={randomLoad}
           onClick={handleRandomOccupancy}
         >
           Random
