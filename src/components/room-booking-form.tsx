@@ -31,6 +31,7 @@ const RoomBookingForm = () => {
   const router = useRouter();
   const [loading, setIsLoading] = useState<boolean>(false);
   const [randomLoad, randomSetLoad] = useState<boolean>(false);
+  const [resetLoad, setResetLoad] = useState<boolean>(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -61,6 +62,7 @@ const RoomBookingForm = () => {
   }
 
   async function handleReset() {
+    setResetLoad(true);
     await resetRooms()
       .then((resp) => {
         if (resp.message) {
@@ -74,6 +76,9 @@ const RoomBookingForm = () => {
       .catch((err) => {
         console.log("error in resetting is", err);
         toast.error(err);
+      })
+      .finally(() => {
+        setResetLoad(false);
       });
   }
 
