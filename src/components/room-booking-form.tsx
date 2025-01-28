@@ -135,7 +135,7 @@ const RoomBookingForm = () => {
             </Button>
           </form>
         </Form>
-        <Button variant="outline" className="rounded" onClick={handleReset}>
+        <Button variant="outline" className="rounded" onClick={handleReset} disabled={resetLoad}>
           Reset
         </Button>
         <Button
