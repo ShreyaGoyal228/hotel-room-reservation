@@ -15,22 +15,41 @@ type BookingResult = {
 };
 
 export const bookRooms = async (noOfRooms: number) => {
-  // Calculate travel time between adjacent rooms in sequence
+  const getRoomDetails = (roomNumber: number) => {
+    const floor = Math.floor(roomNumber / 100);
+    const roomOnFloor = roomNumber % 100;
+    return { floor, roomOnFloor };
+  };
+
+  // Calculate travel time between two rooms
+  const calculateTimeBetweenRooms = (room1: number, room2: number): number => {
+    const r1 = getRoomDetails(room1);
+    const r2 = getRoomDetails(room2);
+    
+    // Vertical travel: 2 minutes per floor
+    const verticalTime = Math.abs(r1.floor - r2.floor) * 2;
+    
+    // Horizontal travel: 1 minute per room difference
+    const horizontalTime = Math.abs(r1.roomOnFloor - r2.roomOnFloor);
+    
+    return verticalTime + horizontalTime;
+  };
+
+  // Calculate maximum travel time between any two rooms in a set
   const calculateTravelTime = (rooms: Room[]): number => {
     if (rooms.length <= 1) return 0;
-
-    const firstRoom = rooms[0]!;
-    const lastRoom = rooms[rooms.length - 1]!;
-
-    // Vertical travel: 2 minutes per floor
-    const verticalTime = Math.abs(firstRoom.floor - lastRoom.floor) * 2;
-
-    // Horizontal travel: 1 minute per room
-    const horizontalTime = Math.abs(
-      (firstRoom.room_number % 100) - (lastRoom.room_number % 100),
-    );
-
-    return verticalTime + horizontalTime;
+    
+    let maxTime = 0;
+    for (let i = 0; i < rooms.length; i++) {
+      for (let j = i + 1; j < rooms.length; j++) {
+        const time = calculateTimeBetweenRooms(
+          rooms[i]!.room_number,
+          rooms[j]!.room_number
+        );
+        maxTime = Math.max(maxTime, time);
+      }
+    }
+    return maxTime;
   };
 
   const findBestRooms = (
@@ -40,10 +59,10 @@ export const bookRooms = async (noOfRooms: number) => {
     let bestRooms: Room[] = [];
     let minTotalTime = Infinity;
 
-    // First try to find rooms on the same floor (Priority 1)
+    // First try to find rooms on the same floor
     for (let floor = 1; floor <= 10; floor++) {
       const floorRooms = availableRooms
-        .filter((room) => room.floor === floor)
+        .filter((room) => Math.floor(room.room_number / 100) === floor)
         .sort((a, b) => a.room_number - b.room_number);
 
       if (floorRooms.length >= noOfRooms) {
@@ -57,27 +76,31 @@ export const bookRooms = async (noOfRooms: number) => {
             bestRooms = combo;
           }
         }
-
-        if (bestRooms.length > 0) break; // Found rooms on same floor
       }
     }
 
-    // If no rooms available on same floor, try across floors (Priority 2)
+    // If no suitable rooms found on the same floor, try combinations across floors
     if (bestRooms.length === 0) {
       // Sort rooms by floor and room number
-      const sortedRooms = [...availableRooms].sort((a, b) => {
-        if (a.floor !== b.floor) return a.floor - b.floor;
-        return a.room_number - b.room_number;
-      });
-
-      // Try each possible combination
+      const sortedRooms = [...availableRooms].sort((a, b) => a.room_number - b.room_number);
+      
+      // Try all possible combinations of the required number of rooms
       for (let i = 0; i <= sortedRooms.length - noOfRooms; i++) {
-        const combo = sortedRooms.slice(i, i + noOfRooms);
-        const totalTime = calculateTravelTime(combo);
-
-        if (totalTime < minTotalTime) {
-          minTotalTime = totalTime;
-          bestRooms = combo;
+        for (let j = i; j <= sortedRooms.length - noOfRooms; j++) {
+          const combo = [];
+          for (let k = 0; k < noOfRooms; k++) {
+            if (j + k < sortedRooms.length) {
+              combo.push(sortedRooms[j + k]!);
+            }
+          }
+          
+          if (combo.length === noOfRooms) {
+            const totalTime = calculateTravelTime(combo);
+            if (totalTime < minTotalTime) {
+              minTotalTime = totalTime;
+              bestRooms = combo;
+            }
+          }
         }
       }
     }
@@ -136,6 +159,7 @@ export const bookRooms = async (noOfRooms: number) => {
       message: "Failed to book rooms.",
     };
   }
+  
 };
 
 export const resetRooms = async () => {
@@ -182,15 +206,13 @@ export const randomOccupancy = async () => {
     // Separate already booked rooms
     const bookedRooms = hotelRooms.filter((room) => !room.is_available) || [];
     const availableRooms = hotelRooms.filter((room) => room.is_available) || [];
-console.log("booked rooms are",bookedRooms)
-console.log("available rooms are",availableRooms.length)
     // Determine random occupancy for available rooms (40% chance to be occupied)
     const updatedRooms = availableRooms.map((room) => ({
       id: room.id,
       is_available: Math.random() > 0.4 ? true : false, // 60% available, 40% occupied
     }));
 
-    const finalRooms = [...bookedRooms, ...updatedRooms];
+    const finalRooms = updatedRooms;
     console.log("final rooms are",finalRooms);
 
     // Update only the rooms that changed

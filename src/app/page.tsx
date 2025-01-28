@@ -10,7 +10,7 @@ export default async function Home() {
           <h1 className="text-3xl font-bold">Hotel Room Reservation</h1>
           <RoomBookingForm />
         </div>
-        <div className="flex justify-center">
+        <div className="px-3 flex justify-center">
           <RoomGrid />
         </div>
       </div>

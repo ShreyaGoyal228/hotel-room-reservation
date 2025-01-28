@@ -11,7 +11,7 @@ const RoomGrid = async() => {
     }
     return (
         <>
-       <div className="flex w-[38%]">
+       <div className="flex md:w-[75%] lg:w-[55%] xl:w-[38%]">
        <div className="w-20 mr-4 border-2 border-gray-300">
         </div>
         <div className="w-full">
