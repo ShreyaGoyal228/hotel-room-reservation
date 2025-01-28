@@ -204,7 +204,7 @@ export const randomOccupancy = async () => {
     });
 
     // Separate already booked rooms
-    const bookedRooms = hotelRooms.filter((room) => !room.is_available) || [];
+    // const bookedRooms = hotelRooms.filter((room) => !room.is_available) || [];
     const availableRooms = hotelRooms.filter((room) => room.is_available) || [];
     // Determine random occupancy for available rooms (40% chance to be occupied)
     const updatedRooms = availableRooms.map((room) => ({
