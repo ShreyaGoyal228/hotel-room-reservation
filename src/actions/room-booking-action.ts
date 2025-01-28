@@ -167,3 +167,47 @@ catch(err)
 }
 
 }
+
+export const randomOccupancy = async () => {
+    try {
+      // all hotel rooms
+      let hotelRooms = await db.rooms.findMany({
+        orderBy: {
+          room_number: "asc",
+        },
+      });
+  
+      // Separate already booked rooms 
+      const bookedRooms = hotelRooms.filter((room) => !room.is_available);
+      const availableRooms = hotelRooms.filter((room) => room.is_available);
+  
+      // Determine random occupancy for available rooms (40% chance to be occupied)
+      const updatedRooms = availableRooms.map((room) => ({
+        id: room.id,
+        is_available: Math.random() > 0.4 ? true : false, // 60% available, 40% occupied
+      }));
+  
+      const finalRooms = [...bookedRooms, ...updatedRooms];
+  
+      // Update only the rooms that changed
+      await db.$transaction(
+        finalRooms.map((room) =>
+          db.rooms.update({
+            where: { id: room.id },
+            data: { is_available: room.is_available },
+          }),
+        ),
+      );
+      return {
+        message: "Random occupancy applied while keeping booked rooms unchanged.",
+      };
+    } catch (err) {
+      console.error("Error in applying random occupancy:", err);
+      return {
+        error: "Failed to apply random occupancy.",
+      };
+    }
+  };
+  
+  
+  
