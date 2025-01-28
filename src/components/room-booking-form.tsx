@@ -138,14 +138,14 @@ const RoomBookingForm = () => {
         <Button variant="outline" className="rounded" onClick={handleReset} disabled={resetLoad}>
           Reset
         </Button>
-        <Button
+        {/* <Button
           variant="outline"
           className="rounded"
           disabled={randomLoad}
           onClick={handleRandomOccupancy}
         >
           Random
-        </Button>
+        </Button> */}
       </div>
     </>
   );
